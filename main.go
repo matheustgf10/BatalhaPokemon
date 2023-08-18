@@ -15,15 +15,101 @@ type Pokemon struct {
 	RecuperaVida int
 }
 
+func (pokemon Pokemon) ApresentarPokemon() {
+	// ! Remover depois para testar
+	if pokemon.Id == 0 {
+		return
+	}
+
+	fmt.Println(fmt.Sprintf("%v - %v", pokemon.Id, pokemon.Nome))
+	fmt.Println(fmt.Sprintf("HP: %v, ATAQUE: %v, RECUPERAÇÃO DE VIDA:%v", pokemon.Vida, pokemon.Ataque, pokemon.RecuperaVida))
+	fmt.Println()
+	Delay()
+}
+
+func (pokemon Pokemon) ApresentarDadosPokemon(isUser bool) {
+	var tipoString = "pokemon adversário"
+
+	if isUser {
+		tipoString = "seu pokemon"
+	}
+	fmt.Println()
+	fmt.Println(fmt.Sprintf("O %v é: %v", tipoString, pokemon.Nome))
+	fmt.Print(fmt.Sprintf("HP: %v, ATAQUE: %v, RECUPERAÇÃO DE VIDA:%v\n", pokemon.Vida, pokemon.Ataque, pokemon.RecuperaVida))
+}
+
+func RegistrarAcao() (interacao, subacao int) {
+	fmt.Println("1- Para atacar")
+	Delay()
+	fmt.Println()
+
+	fmt.Println("2- Para Recuperar sua vida")
+	Delay()
+	fmt.Println()
+
+	fmt.Print("Escolha uma opção:")
+	fmt.Println()
+
+	fmt.Scan(&interacao)
+
+	switch interacao {
+	case 1:
+		fmt.Println("Escolha o tipo de ataque")
+		Delay()
+		fmt.Println()
+
+		fmt.Println("1-Ataque normal")
+		fmt.Println()
+		Delay()
+
+		fmt.Println("2-Ataque Especial")
+		fmt.Println()
+		Delay()
+
+		fmt.Print("Escolha uma opção de ataque:")
+		fmt.Println()
+		Delay()
+
+		fmt.Scan(&subacao)
+	}
+
+	return
+}
+
+func (pokemon *Pokemon) ExecutarAcao(pokemonInimigo *Pokemon, acao, subacao int) {
+	if acao == 1 {
+		switch subacao {
+		case 1:
+			pokemonInimigo.Vida -= pokemon.Ataque
+			fmt.Printf("O pokemon %v atacou com %v de dano.\n", pokemon.Nome, pokemon.Ataque)
+			fmt.Println()
+			Delay()
+		case 2:
+			pokemonInimigo.Vida -= pokemon.Ataque + 15
+			fmt.Printf("O pokemon %v super atacou com %v de dano.\n", pokemon.Nome, pokemon.Ataque+15)
+			fmt.Println()
+			Delay()
+		}
+	} else {
+		if pokemon.Vida+pokemon.RecuperaVida <= pokemon.VidaMax {
+			pokemon.Vida += pokemon.RecuperaVida
+			fmt.Printf("o pokemon %v recuperou %v de vida.\n", pokemon.Nome, pokemon.Vida)
+			fmt.Println()
+			Delay()
+		} else {
+			fmt.Println("Você não pode recuperar mais vida, rodada perdida")
+			fmt.Println()
+			Delay()
+		}
+	}
+}
+
 func Delay() {
 	time.Sleep(1 * time.Second)
 }
 
-func main() {
-
-	// POKEMONS ULTILIZÁVEIS
-
-	Charizard := Pokemon{
+func MontarPokemons() (listaPokemons []Pokemon) {
+	charizard := Pokemon{
 		Id:           1,
 		Nome:         "Charizard",
 		Vida:         70,
@@ -32,7 +118,7 @@ func main() {
 		RecuperaVida: 10,
 	}
 
-	Blastoise := Pokemon{
+	blastoise := Pokemon{
 		Id:           2,
 		Nome:         "Blastoise",
 		Vida:         100,
@@ -41,7 +127,7 @@ func main() {
 		RecuperaVida: 13,
 	}
 
-	Venusaur := Pokemon{
+	venusaur := Pokemon{
 		Id:           3,
 		Nome:         "Venusaur",
 		Vida:         110,
@@ -50,9 +136,7 @@ func main() {
 		RecuperaVida: 12,
 	}
 
-	//POKEMONS INIMIGOS
-
-	Mew := Pokemon{
+	mew := Pokemon{
 		Nome:         "Mew",
 		Vida:         150,
 		VidaMax:      150,
@@ -60,14 +144,15 @@ func main() {
 		RecuperaVida: 70,
 	}
 
-	Mewtwo := Pokemon{
+	mewtwo := Pokemon{
 		Nome:         "Mewtwo",
 		Vida:         100,
 		VidaMax:      100,
 		Ataque:       20,
 		RecuperaVida: 15,
 	}
-	Suicune := Pokemon{
+
+	suicune := Pokemon{
 		Nome:         "Suicune",
 		Vida:         100,
 		VidaMax:      100,
@@ -75,234 +160,112 @@ func main() {
 		RecuperaVida: 40,
 	}
 
+	listaPokemons = make([]Pokemon, 0)
+
+	listaPokemons = append(listaPokemons, charizard, blastoise, venusaur, mew, mewtwo, suicune)
+	return
+}
+
+func PokemonsValidosIDs(listaPokemons []Pokemon) (res []int) {
+	for _, pokemon := range listaPokemons {
+		if pokemon.Id != 0 {
+			res = append(res, pokemon.Id)
+		}
+	}
+
+	return
+}
+
+func BuscarPokemon(idPokemon int, listaPokemons []Pokemon) (res Pokemon) {
+	for _, pokemon := range listaPokemons {
+		if pokemon.Id == idPokemon {
+			return pokemon
+		}
+	}
+	return
+}
+
+func IsInInt(base int, values ...int) (isIn bool) {
+	for _, value := range values {
+		if value == base {
+			return true
+		}
+	}
+	return
+}
+
+func IniciarBatalha() {
+	var pokemonUsuario, pokemonPC Pokemon
+	pokemons := MontarPokemons()
+
 	// Aleatorizando o Pokemon Inimigo
-	PokemonInimigo := rand.Intn(3) + 1
+	pokemonPC = pokemons[rand.Intn(3)+3]
 
 	//ESCOLHENDO O POKEMON
 
 	fmt.Println("BEM VINDO A BATALHA POKEMÓN")
 	Delay()
 
-	fmt.Println("1-Charizard")
-	fmt.Println("HP: 70, ATAQUE: 12, RECUPERAÇÃO DE VIDA:10")
-	fmt.Println()
-	Delay()
+	for _, pokemon := range pokemons {
+		pokemon.ApresentarPokemon()
+	}
 
-	fmt.Println("2-Blastoise")
-	fmt.Println("HP: 100, ATAQUE: 8, RECUPERAÇÃO DE VIDA:13")
-	fmt.Println()
-	Delay()
-
-	fmt.Println("3-Venusaur")
-	fmt.Println("HP: 110, ATAQUE: 9, RECUPERAÇÃO DE VIDA:7")
-	fmt.Println()
-	Delay()
-
-	fmt.Print("Escolha o seu pokemon:")
-
-	var Escolher int
-
-	fmt.Scan(&Escolher)
+	fmt.Println("Escolha o seu pokemon:")
+	var idPokemonUsuario int
+	fmt.Scan(&idPokemonUsuario)
 
 	//VALIDANDO A ESCOLHA
-
-	for Escolher != Charizard.Id && Escolher != Blastoise.Id && Escolher != Venusaur.Id {
-		fmt.Println("Escolha uma opção válida entre 1 a 3")
-		fmt.Scan(&Escolher)
+	for !IsInInt(idPokemonUsuario, PokemonsValidosIDs(pokemons)...) {
+		fmt.Println("Escolha uma opção válida")
+		fmt.Scan(&idPokemonUsuario)
 	}
 
 	//MOSTRANDO A ESCOLHA DO USUÁRIO
+	pokemonUsuario = BuscarPokemon(idPokemonUsuario, pokemons)
+	pokemonUsuario.ApresentarDadosPokemon(true)
 	Delay()
-	switch Escolher {
-	case 1:
-		fmt.Println("Você escolheu o", Charizard.Nome)
-	case 2:
-		fmt.Println("Você escolheu o", Blastoise.Nome)
-	case 3:
-		fmt.Println("Você escolheu o", Venusaur.Nome)
-
-	}
-	fmt.Println()
 
 	//MOSTRANDO A ESCOLHA DO COMPUTADOR
-	Delay()
-	switch PokemonInimigo {
-	case 1:
-		fmt.Println("Seu adversário  o:", Mew.Nome)
-		fmt.Print("HP: 150, ATAQUE: 10, RECUPERAÇÃO DE VIDA:70\n")
-	case 2:
-		fmt.Println("Seu adversário  o:", Mewtwo.Nome)
-		fmt.Print("HP: 100, ATAQUE: 20, RECUPERAÇÃO DE VIDA:15\n")
-	case 3:
-		fmt.Println("Seu adversário  o:", Suicune.Nome)
-		fmt.Print("HP: 100, ATAQUE: 15, RECUPERAÇÃO DE VIDA:40\n")
-
-	}
-	fmt.Println()
-
-	var PokemonUsuario Pokemon
-
-	switch Escolher {
-	case 1:
-		PokemonUsuario = Charizard
-	case 2:
-		PokemonUsuario = Blastoise
-	case 3:
-		PokemonUsuario = Venusaur
-	}
-
-	var PokemonPC Pokemon
-
-	switch PokemonInimigo {
-	case 1:
-		PokemonPC = Mew
-	case 2:
-		PokemonPC = Mewtwo
-	case 3:
-		PokemonPC = Suicune
-	}
+	pokemonPC.ApresentarDadosPokemon(false)
 
 	Delay()
 	fmt.Println("A batalha vai começaaaaar")
 	fmt.Println()
 
 	Delay()
-	fmt.Println(fmt.Sprintf("%s X %s", PokemonUsuario.Nome, PokemonPC.Nome))
+	fmt.Println(fmt.Sprintf("%s X %s", pokemonUsuario.Nome, pokemonPC.Nome))
 	fmt.Println()
 	fmt.Println("--------------------------------------------------------------------")
 
-	for PokemonPC.Vida > 0 && PokemonUsuario.Vida > 0 {
-
-		fmt.Printf("VIDA DO SEU POKEMON: %d\n", PokemonUsuario.Vida)
+	for pokemonPC.Vida > 0 && pokemonUsuario.Vida > 0 {
+		fmt.Printf("VIDA DO SEU POKEMON: %d\n", pokemonUsuario.Vida)
 		fmt.Println()
 		Delay()
 
 		Delay()
-		fmt.Printf("VIDA DO POKEMON INIMIGO: %d\n", PokemonPC.Vida)
+		fmt.Printf("VIDA DO POKEMON INIMIGO: %d\n", pokemonPC.Vida)
 		fmt.Println()
 		Delay()
 
-		fmt.Println("1- Para atacar")
-		Delay()
-		fmt.Println()
+		// Responsável por registrar a ação escolhida pelo usuário
+		acaoUsuario, subacaoUsuario := RegistrarAcao()
 
-		fmt.Println("2- Para Recuperar sua vida")
-		Delay()
-		fmt.Println()
+		acaoPC, subacaoPC := rand.Intn(2)+1, rand.Intn(2)+1
 
-		fmt.Print("Escolha uma opção:")
-		fmt.Println()
+		// Responsável por executar uma ação definida anteriormente
+		pokemonUsuario.ExecutarAcao(&pokemonPC, acaoUsuario, subacaoUsuario)
+		// Responsável por executar uma ação definida de forma automágica
+		pokemonPC.ExecutarAcao(&pokemonUsuario, acaoPC, subacaoPC)
 
-		var Interacao int
-
-		fmt.Scan(&Interacao)
-
-		switch Interacao {
-
-		//ATAQUE DO USUÁRO
-		case 1:
-			fmt.Println("Escolha o tipo de ataque")
-			Delay()
-			fmt.Println()
-
-			fmt.Println("1-Ataque normal")
-			fmt.Println()
-			Delay()
-
-			fmt.Println("2-Ataque Especial")
-			fmt.Println()
-			Delay()
-
-			fmt.Print("Escolha uma opção de ataque:")
-			fmt.Println()
-			Delay()
-
-			var Ataque int
-
-			fmt.Scan(&Ataque)
-
-			var UsuarioAtaca int
-			if Ataque == 1 {
-				UsuarioAtaca = PokemonUsuario.Ataque
-			} else if Ataque == 2 {
-				UsuarioAtaca = PokemonUsuario.Ataque + 20
-			} else {
-				fmt.Println("Você errou o ataque, na próxima escolha uma opção válida")
-				fmt.Println()
-				Delay()
-
-			}
-
-			PokemonPC.Vida -= UsuarioAtaca
-			Delay()
-			fmt.Printf("Voce atacou o %s com %d de dano\n ", PokemonPC.Nome, UsuarioAtaca)
-			fmt.Println()
-			Delay()
-
-		case 2:
-			//RECUPERAR VIDA DO POKEMON USUARIO
-			PokemonUsuario.Vida += PokemonUsuario.RecuperaVida
-
-			if PokemonUsuario.Vida > PokemonUsuario.VidaMax {
-				Delay()
-
-				fmt.Printf("Seu pokemon já está com vida máxima, perdeu o ataque\n")
-				fmt.Println()
-				Delay()
-
-			} else {
-				Delay()
-				fmt.Printf("você recuperou %d de vida do seu pokemon\n", PokemonUsuario.RecuperaVida)
-				fmt.Println()
-
-			}
-		default:
-			// Opção inválida
-			fmt.Println("Opção inválida. Você perdeu a rodada.")
-			fmt.Println()
-			Delay()
-		}
-
-		TurnoPC := rand.Intn(2) + 1
-		if TurnoPC == 1 {
-			// O computador ataca
-
-			poderAtaque := PokemonPC.Ataque
-			PokemonUsuario.Vida -= poderAtaque
-			Delay()
-
-			fmt.Printf("Seu adversário %s atacou com %d de dano.\n", PokemonPC.Nome, poderAtaque)
-			fmt.Println()
-			Delay()
-
-		} else {
-			// O computador recupera vida
-
-			if PokemonPC.Vida >= PokemonPC.VidaMax {
-				fmt.Printf("O pokemon  %s tentou recuperar  vida, mas já estava com a vida máxima\n", PokemonPC.Nome)
-				fmt.Println()
-				Delay()
-
-			} else {
-				fmt.Printf("Seu adversário %s recuperou %d de vida.\n", PokemonPC.Nome, PokemonPC.RecuperaVida)
-				fmt.Println()
-				Delay()
-
-				if PokemonPC.Vida+PokemonPC.RecuperaVida > PokemonPC.VidaMax {
-					PokemonPC.Vida = PokemonPC.VidaMax
-				} else {
-					PokemonPC.Vida += PokemonPC.RecuperaVida
-				}
-			}
-			Delay()
-
-		}
-
-		if PokemonUsuario.Vida < 0 {
-			fmt.Println(fmt.Sprintf("você foi derrotado pelo %s", PokemonPC.Nome))
-		} else if PokemonPC.Vida < 0 {
-			fmt.Println(fmt.Sprintf("você derrotou o %s", PokemonPC.Nome))
+		if pokemonUsuario.Vida < 0 {
+			fmt.Println(fmt.Sprintf("você foi derrotado pelo %s", pokemonPC.Nome))
+		} else if pokemonPC.Vida < 0 {
+			fmt.Println(fmt.Sprintf("você derrotou o %s", pokemonPC.Nome))
 		}
 
 	}
+}
+
+func main() {
+	IniciarBatalha()
 }
